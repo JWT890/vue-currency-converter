@@ -3,7 +3,7 @@
         <h1>Currency Converter</h1>
         <div class="container">
             <div class="container-one">
-                <select name="first-currency" id="first-currency">
+                <select name="first-currency" id="first-currency" v-model="currency_one">
                     <option value=”AED“>AED</option>
                     <option value=”ARS”>ARS</option>
                     <option value=”AUD”>AUD</option>
@@ -36,14 +36,20 @@
                     <option value=”ZAR”>ZAR</option>
                     <option value=”ZWL”>ZWL</option>
                 </select>
-                <input type="number" name="input-one" id="input-one" />
+                <input 
+                type="number" 
+                name="input-one" 
+                id="input-one" 
+                v-model="amountOne" 
+                @input="fetchData()"
+                />
             </div>
             <div class="container-two">
-                <button>Switch</button>
-                <h4 id="baseValue">1 USD = 0.91 EUR</h4>
+                <button @click="switchValues()">Switch</button>
+                <h4 id="baseValue">1 {{ currency_one }} = {{ rate }}  {{ currency_two }}</h4>
             </div>
             <div class="container-three">
-                <select name="second-currency" id="second-currency">
+                <select name="second-currency" id="second-currency" v-model="currency_two">
                     <option value=”AED“>AED</option>
                     <option value=”ARS”>ARS</option>
                     <option value=”AUD”>AUD</option>
@@ -76,10 +82,12 @@
                     <option value=”ZAR”>ZAR</option>
                     <option value=”ZWL”>ZWL</option>
                 </select>
-                <input type="number" id="amount-two" placeholder="0" disabled/>
+                <input type="number" id="amount-two" placeholder="0" disabled v-model="amountTwo"/>
             </div>
             <div class="container-four">
-                <h4 id="lastlyUpdated">Last Updated December 21, 2023</h4>
+                <h4 id="Updated"> 
+                Updated: {{ data.time_last_update_utc }}
+                </h4>
             </div>
         </div>
     </div>
@@ -87,8 +95,41 @@
 
 <script>
 export default {
-    
-}
+    data() {
+        return {
+            data: [],
+            currency_one: "USD",
+            currency_two: "EUR",
+            rate: "",
+            amountOne: 1,
+            amountTwo: 0,
+        };
+    },
+    methods: {
+        fetchData() {
+            fetch(
+                `https://v6.exchangerate-api.com/v6/YourAPIKey/latest/${this.currency_one}`
+            )
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                this.data = data;
+                this.rate = data.conversion_rates[this.currency_two];
+                this.amountTwo = this.amountOne * this.rate.toFixed(2);
+            });
+        },
+        
+        switchValues() {
+            const temporaryValue = this.currency_one
+            this.currency_one = this.currency_two
+            this.currency_two = temporaryValue;
+            this.fetchData();
+        }
+    },
+    mounted() {
+        this.fetchData();
+    }
+};
 </script>
 
 <style>
@@ -141,6 +182,25 @@ img {
 }
 
 select {
-    
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid rgba(0,0,0,0.5);
+    outline: none;
+}
+
+input {
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid rgba(0,0,0,0.5);
+    outline: none;
+    font-size: 80px;
+}
+
+#Updated {
+    font-weight: 500;
+}
+
+#baseValue {
+    font-weight: 500;
 }
 </style>
