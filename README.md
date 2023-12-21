@@ -1,4 +1,5 @@
 # vue-currency-converter
+API for currency converter can be found here: https://www.exchangerate-api.com/
 
 ## Project setup
 ```
